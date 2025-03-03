@@ -1,0 +1,34 @@
+﻿@model IEnumerable<InventoryManagementSystemMe.Models.Purchase>
+
+<h2>Purchase List</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Purchased Price</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Purchased Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var purchase in Model)
+        {
+            <tr>
+                <td>@purchase.ProductName</td>
+                <td>@purchase.PurchasedPrice</td>
+                <td>@purchase.Quantity</td>
+                <td>@purchase.TotalPrice</td>
+                <td>@purchase.PurchasedDate.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@purchase.PurchaseID">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@purchase.PurchaseID">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create">Add New Purchase</a>
+
