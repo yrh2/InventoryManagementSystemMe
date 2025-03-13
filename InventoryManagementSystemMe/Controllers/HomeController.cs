@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using InventoryManagementSystemMe.Models;
 using Microsoft.AspNetCore.Mvc;
-using InventoryManagementSystemMe.Data; // Ensure you include the namespace for your DbContext
+using InventoryManagementSystemMe.Data; 
 
 
 namespace InventoryManagementSystemMe.Controllers
