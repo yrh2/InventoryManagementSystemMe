@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace InventoryManagementSystemMe.Models
 {
@@ -9,14 +9,17 @@ namespace InventoryManagementSystemMe.Models
 
         [Required]
         [MaxLength(100)]
+        [Display(Name = "Product Name")]
         public required string ProductName { get; set; }
 
         public decimal Price { get; set; }
 
+        [Display(Name = "Product Quantity")]
         public int ProductQuantity { get; set; }
 
         [Required]
         [MaxLength(100)]
+        [Display(Name = "Supplier Name")]
         public required string SupplierName { get; set; }
 
     }
