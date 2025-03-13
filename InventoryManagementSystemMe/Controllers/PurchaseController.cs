@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InventoryManagementSystemMe.Data;
 using InventoryManagementSystemMe.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 namespace InventoryManagementSystemMe.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PurchaseController : ControllerBase
+    [Route("[controller]")]
+    public class PurchaseController : Controller
     {
         private readonly InventoryManagementContext _context;
 
@@ -17,55 +18,93 @@ namespace InventoryManagementSystemMe.Controllers
             _context = context;
         }
 
-        // GET: api/Purchase
+        // GET: Purchase
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Purchase>>> GetPurchase()
+        public async Task<IActionResult> Index()
         {
-            return await _context.Purchase.ToListAsync();
+            var purchase = await _context.Purchase.ToListAsync();
+            return View(purchase); // Returns the list view of purchases
         }
 
-        // GET: api/Purchase/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Purchase>> GetPurchase(int id)
+        // GET: Purchase/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
         {
-            var purchase = await _context.Purchase.FindAsync(id);
-
+            var purchase = await _context.Products.FindAsync(id);
             if (purchase == null)
             {
                 return NotFound();
             }
 
-            return purchase;
+            return View(purchase); // Returns the details view of a specific purchases
         }
 
-        // POST: api/Purchase
-        [HttpPost]
-        public async Task<ActionResult<Purchase>> PostPurchase(Purchase purchase)
+        // GET: Purchases/Create
+        [HttpGet("Create")]
+        public IActionResult Create()
         {
-            _context.Purchase.Add(purchase);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPurchase", new { id = purchase.PurchaseID }, purchase);
+            return View(); // Returns the view for creating a new purchase
         }
 
-        // PUT: api/Purchase/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPurchase(int id, Purchase purchase)
+        // POST: Purchase/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Purchase purchase)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(purchase);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index)); // Redirects to the purchase list
+            }
+            return View(purchase);
+        }
+
+        // GET: Purchase/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var purchase = await _context.Purchase.FindAsync(id);
+            if (purchase == null)
+            {
+                return NotFound();
+            }
+            return View(purchase); // Returns the edit view for a specific purchase
+        }
+
+        // POST: Purchase/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Purchase purchase)
         {
             if (id != purchase.PurchaseID)
             {
                 return BadRequest();
             }
 
-            _context.Entry(purchase).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(purchase);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PurchaseExists(id))
+                    {
+                        return NotFound();
+                    }
+                    throw;
+                }
+                return RedirectToAction(nameof(Index)); // Redirects to the purchase list
+            }
+            return View(purchase);
         }
 
-        // DELETE: api/Purchase/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePurchase(int id)
+        // GET: Purchase/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             var purchase = await _context.Purchase.FindAsync(id);
             if (purchase == null)
@@ -73,10 +112,26 @@ namespace InventoryManagementSystemMe.Controllers
                 return NotFound();
             }
 
-            _context.Purchase.Remove(purchase);
-            await _context.SaveChangesAsync();
+            return View(purchase); // Returns the delete confirmation view
+        }
 
-            return NoContent();
+        // POST: Purchase/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var purchase = await _context.Purchase.FindAsync(id);
+            if (purchase != null)
+            {
+                _context.Purchase.Remove(purchase);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index)); // Redirects to the purchase list
+        }
+
+        private bool PurchaseExists(int id)
+        {
+            return _context.Purchase.Any(e => e.PurchaseID == id);
         }
     }
 }
