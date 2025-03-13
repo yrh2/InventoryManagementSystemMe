@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InventoryManagementSystemMe.Data;
 using InventoryManagementSystemMe.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
 namespace InventoryManagementSystemMe.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SuppliersController : ControllerBase
+    [Route("[controller]")]
+    public class SuppliersController : Controller
     {
         private readonly InventoryManagementContext _context;
 
@@ -17,55 +18,93 @@ namespace InventoryManagementSystemMe.Controllers
             _context = context;
         }
 
-        // GET: api/Suppliers
+        // GET: Suppliers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Supplier>>> GetSuppliers()
+        public async Task<IActionResult> Index()
         {
-            return await _context.Suppliers.ToListAsync();
+            var supplier = await _context.Suppliers.ToListAsync();
+            return View(supplier); // Returns the list view of suppliers
         }
 
-        // GET: api/Suppliers/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Supplier>> GetSupplier(int id)
+        // GET: Suppliers/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
         {
             var supplier = await _context.Suppliers.FindAsync(id);
-
             if (supplier == null)
             {
                 return NotFound();
             }
 
-            return supplier;
+            return View(supplier); // Returns the details view of a specific supplier
         }
 
-        // POST: api/Suppliers
-        [HttpPost]
-        public async Task<ActionResult<Supplier>> PostSupplier(Supplier supplier)
+        // GET: Suppliers/Create
+        [HttpGet("Create")]
+        public IActionResult Create()
         {
-            _context.Suppliers.Add(supplier);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSupplier", new { id = supplier.SupplierID }, supplier);
+            return View(); // Returns the view for creating a new supplier
         }
 
-        // PUT: api/Suppliers/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSupplier(int id, Supplier supplier)
+        // POST: Suppliers/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Supplier supplier)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(supplier);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index)); // Redirects to the supplier list
+            }
+            return View(supplier);
+        }
+
+        // GET: Suppliers/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var supplier = await _context.Suppliers.FindAsync(id);
+            if (supplier == null)
+            {
+                return NotFound();
+            }
+            return View(supplier); // Returns the edit view for a specific supplier
+        }
+
+        // POST: Suppliers/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Supplier supplier)
         {
             if (id != supplier.SupplierID)
             {
                 return BadRequest();
             }
 
-            _context.Entry(supplier).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(supplier);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!SupplierExists(id))
+                    {
+                        return NotFound();
+                    }
+                    throw;
+                }
+                return RedirectToAction(nameof(Index)); // Redirects to the supplier list
+            }
+            return View(supplier);
         }
 
-        // DELETE: api/Suppliers/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSupplier(int id)
+        // GET: Suppliers/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             var supplier = await _context.Suppliers.FindAsync(id);
             if (supplier == null)
@@ -73,10 +112,26 @@ namespace InventoryManagementSystemMe.Controllers
                 return NotFound();
             }
 
-            _context.Suppliers.Remove(supplier);
-            await _context.SaveChangesAsync();
+            return View(supplier); // Returns the delete confirmation view
+        }
 
-            return NoContent();
+        // POST: Suppliers/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var supplier = await _context.Suppliers.FindAsync(id);
+            if (supplier != null)
+            {
+                _context.Suppliers.Remove(supplier);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index)); // Redirects to the supplier list
+        }
+
+        private bool SupplierExists(int id)
+        {
+            return _context.Suppliers.Any(e => e.SupplierID == id);
         }
     }
 }
