@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace InventoryManagementSystemMe.Models
@@ -10,6 +10,7 @@ namespace InventoryManagementSystemMe.Models
 
         [Required]
         [MaxLength(100)]
+        [Display(Name = "Supplier Name")]
         public required string SupplierName { get; set; }
 
         [Required]
