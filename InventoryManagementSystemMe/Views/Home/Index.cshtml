@@ -1,8 +1,65 @@
-﻿@{
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@model List<Product> 
+
+
+<h2 class="text-center my-4">Manage Inventory</h2>
+
+
+<form method="get" asp-action="Index" class="d-flex justify-content-between mb-3">
+    <input type="text" name="searchQuery" class="form-control w-25" placeholder="Search inventory" value="@Context.Request.Query["searchQuery"]" />
+    <div>
+        <a class="btn btn-success" asp-controller="Products" asp-action="Create">Add New Item</a>
+
+        <!-- Updated Save Button to Export PDF -->
+        <a class="btn btn-primary" onclick="printPage()">Save Data as PDF</a>
+    </div>
+</form>
+
+<script>
+    function printPage() {
+        window.print(); // Opens the browser print dialog (User can save as PDF)
+    }
+</script>
+
+<table class="table table-bordered table-hover shadow-lg">
+    <thead class="bg-danger text-white">
+        <tr>
+            <th class="text-center">Product Name</th>
+            <th class="text-center">Quantity</th>
+            <th class="text-center">Unit Price</th>
+            <th class="text-center">Total Price</th>
+            <th class="text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="bg-light">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var product in Model)
+            {
+                <tr class="align-middle">
+                    <td class="text-center">@product.ProductName</td>
+                    <td class="text-center fw-bold">@product.ProductQuantity</td>
+                    <td class="text-center text-success fw-bold">RM @product.Price</td>
+                    <td class="text-center text-primary fw-bold">RM @(product.ProductQuantity * product.Price)</td>
+                    <td class="text-center">
+                        <a class="btn btn-sm btn-outline-primary me-1" asp-controller="Products" asp-action="Edit" asp-route-id="@product.ProductID">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a class="btn btn-sm btn-outline-danger" asp-controller="Products" asp-action="Delete" asp-route-id="@product.ProductID">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted">No products available.</td>
+            </tr>
+        }
+    </tbody>
+</table>
